@@ -1,0 +1,67 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceRoot}",
+                "${workspaceRoot}/components/tft_st7735/include",
+                "${workspaceRoot}/components/mm_common/include",
+                "${workspaceRoot}/components/web_host/include",
+                "${workspaceRoot}/components/wifi_func_set/include",
+
+                "${workspaceRoot}/build/config",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/xtensa/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/xtensa/esp32/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/esp_rom/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/log/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/soc/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/soc/esp32/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/esp_common/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/heap/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/esp32/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/driver/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/driver/esp32/include",
+                "${workspaceRoot}/../idf/opt/esp/tools/xtensa-esp32-elf/esp-2019r2-8.2.0/xtensa-esp32-elf/xtensa-esp32-elf/include",
+                "${workspaceRoot}/../idf/opt/esp/tools/xtensa-esp32-elf/esp-2019r2-8.2.0/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/8.2.0/include",
+
+                "${workspaceRoot}/../idf/opt/esp/tools/xtensa-esp32-elf/esp-2019r2-8.2.0/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/8.2.0",
+                "${workspaceRoot}/../idf/opt/esp/tools/xtensa-esp32-elf/esp-2019r2-8.2.0/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/8.2.0/xtensa-esp32-elf",
+
+                "${workspaceRoot}/../idf/opt/esp/idf/components/freertos/include",
+
+                "${workspaceRoot}/../idf/opt/esp/idf/components/vfs/include",
+
+                "${workspaceRoot}/../idf/opt/esp/idf/components/lwip/port/esp32/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/lwip/include",               
+                "${workspaceRoot}/../idf/opt/esp/idf/components/lwip/include/apps",                
+                "${workspaceRoot}/../idf/opt/esp/idf/components/lwip/lwip/src/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/lwip/lwip/src/include/lwip/apps",
+
+                "${workspaceRoot}/../idf/opt/esp/idf/components/tcpip_adapter/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/esp_eth/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/nvs_flash/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/esp_netif/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/esp_event/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/esp_wifi/include",
+
+                "${workspaceRoot}/../idf/opt/esp/idf/components/sdmmc/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/spi_flash/include",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/fatfs/vfs",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/fatfs/src",
+                "${workspaceRoot}/../idf/opt/esp/idf/components/wear_levelling/include",
+
+                "${workspaceRoot}/../idf/opt/esp/idf/components/esp_http_server/include"
+
+            ],
+            "intelliSenseMode": "clang-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}/**"
+                ]
+            }
+        }
+    ],
+    "version": 4
+}

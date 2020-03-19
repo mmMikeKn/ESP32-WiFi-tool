@@ -1,0 +1,12 @@
+{
+"sta_list":[
+{"mac":"10:f1:f2:0c:06:8b","hostname":"android-123451183c23456d","dt":"00:01.020"}],
+"dns_list":[
+{"mac":"10:f1:f2:0c:06:8b","url":"connectivitycheck.android.com","dt":"00:01.020"},
+{"mac":"10:f1:f2:0c:06:8b","url":"3p.ampproject.net","dt":"00:02.120"},
+{"mac":"10:f1:f2:0c:06:8b","url":"ad.doubleclick.net","dt":"00:02.520"},
+{"mac":"10:f1:f2:0c:06:8b","url":"ads.adfox.ru","dt":"00:03.410"},
+{"mac":"10:f1:f2:0c:06:8b","url":"an.webvisor.org","dt":"00:03.001"},
+{"mac":"10:f1:f2:0c:06:8b","url":"clients3.google.com","dt":"00:03.020"},
+{"mac":"10:f1:f2:0c:06:8b","url":"d30s0lx1onfwyh.cloudfront.net","dt":"00:05.010"}
+]}

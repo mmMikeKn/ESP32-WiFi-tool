@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<!--suppress HtmlFormInputWithoutLabel -->
+<html>
+
+<head>
+    <title>ESP32 setup</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+        * {
+            box-sizing: border-box;
+            background-color: lightsteelblue;
+        }
+
+        .mm_checkbox {
+            width: 2em;
+            height: 2em;
+            background: #333;
+            position: relative;
+        }
+
+        .mm_table {
+            font-size: 1.5em;
+            color: black;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            border-collapse: collapse;
+            border: 1px solid #343a45;
+            margin: 0.2em;
+            border-radius: 10px;
+            box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+
+        .mm_table th,
+        .mm_table td {
+            border-right: 1px solid #343a45;
+        }
+
+        .mm_table th {
+            background: #abd5ff;
+            border-bottom: 3px solid #9ea7af;
+            padding: 0.2em 0.2em;
+        }
+
+        .mm_table td {
+            padding: 0.2em 0.5em;
+        }
+
+        .mm_table tr:hover td {
+            background: #4E5066;
+            color: white;
+        }
+
+        .mm_table tr:nth-child(odd) td {
+            background: #EBEBEB;
+        }
+
+        .mm_content {
+            padding: 3.5em 0;
+            min-width: 50em;
+            width: 100%;
+        }
+
+        .mm_tab {
+            display: none;
+            padding: 6px;
+            border: none;
+            border-top: none;
+        }
+
+        .mm_nav {
+            overflow: hidden;
+            background-color: darkblue;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3.5em;
+        }
+
+        .mm_nav button {
+            color: white;
+            float: left;
+            display: block;
+            background-color: inherit;
+            border: none;
+            outline: none;
+            text-decoration: none;
+            text-align: center;
+            padding: 14px 16px;
+            font-size: 1.7em;
+            transition: 0.5s;
+        }
+
+        .mm_nav button:hover {
+            background-color: blue;
+        }
+
+        .mm_nav button.active {
+            background-color: darkgreen;
+        }
+
+        .mm_table caption {
+            border: 1px solid #343a45;
+            background: #03A9F4;
+            color: Black;
+            padding: .5em;
+            width: 100%;
+        }
+
+        .mm_label {
+            color: black;
+            text-align: right;
+            font-size: 1.5em;
+            margin-left: 0.5em;
+            margin-top: 1em;
+            min-width: 7em;
+        }
+
+        .mm_input {
+            background: darkgray;
+            color: white;
+            border-color: blue;
+            border-width: 1px;
+            font-size: 1.5em;
+            padding: .5em;
+            margin: .5em;
+            width: 100%;
+            min-width: 7em;
+            border-radius: 10px;
+        }
+
+        .mm_input:required {
+            box-shadow: 4px 4px 10px rgba(226, 129, 129, 0.85);
+        }
+
+        .mm_input:focus {
+            background: rgb(105, 104, 104);
+            outline: none;
+        }
+
+        .mm_input::invalid {
+            border-color: red;
+            border-width: 2px;
+        }
+
+        .mm_button {
+            outline: none;
+            color: black;
+            border: none;
+            padding: .5em;
+            margin: 0.5em;
+            font-size: 1.5em;
+            min-width: 7em;
+            box-shadow: 0 10px 10px 0 lightgoldenrodyellow, 0 6px 20px 0 lightgoldenrodyellow;
+        }
+
+        .mm_button_download {
+            background: darkseagreen;
+            border-radius: 20px;
+        }
+
+        .mm_button_download:disabled {
+            background-color: #aaa;
+            color: grey;
+        }
+
+        .mm_button:active {
+            background-color: darkgreen;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
+        .mm_button_action {
+            background: lightseagreen;
+            border-radius: 5px;
+        }
+
+        .mm_button_action_set {
+            background: lightsalmon;
+            border-radius: 5px;
+        }
+
+        .mm_progressStatus {
+            width: 100%;
+            background-color: #ddd;
+        }
+
+        #download_progress_bar {
+            width: 0.1%;
+            height: 64px;
+            background-color: green;
+            align-self: center;
+            text-align: center;
+            line-height: 64px;
+            color: white;
+            font-size: 3em;
+            display: none
+        }
+
+        .mm_textarea {
+            padding: 0;
+            background: lightcyan;
+            font-size: 2em;
+            height: 30em;
+            min-width: 10em;
+        }
+
+        .mm_input_file {
+            background: lightskyblue;
+            font-size: 1.5em;
+            border-radius: 5px;
+            text-align: center;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mm_nav">
+        <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+            <i class="fa fa-bars"></i>
+        </a>
+        <button class="tabbtn" onclick="switchTab(event, 'filters')" id="defTab">Filter</button>
+        <button class="tabbtn" onclick="switchTab(event, 'downloads')">Downloads</button>
+        <button class="tabbtn" onclick="switchTab(event, 'ap_spam_list')">Spam list</button>
+        <button class="tabbtn" onclick="switchTab(event, 'router_ap')">Router</button>
+        <button class="tabbtn" onclick="switchTab(event, 'router_sniff')">DNS sniff</button>
+    </div>
+    <div class="mm_content">
+        <div id="filters" class="mm_tab" style="display: flex; flex-direction: column;">
+            <div style="display: flex; flex-direction: column;">
+                <table id="ap_table" class="mm_table" />
+                </table>
+                <table id="mac_table" class="mm_table" />
+                </table>
+            </div>
+            <div style="display: flex; flex-direction: row wrap;">
+                <div style="display: flex; flex-direction: column;">
+                    <button onclick="filterRemove()" class="mm_button_action mm_button">Remove selected</button>
+                    <table id="filter_table" class="mm_table" style="width: 12em;"></table>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <input id="router_ap_file_up" class="mm_input_file mm_button" type="file"
+                        onchange="handleFilterFiles(this.files)" onclick="this.value = null;" />
+                    <div style="display: flex; flex-direction: row wrap;">
+                        <div style="display: flex; flex-direction: column;">
+                            <button onclick="filterAdd('#ap_table')" class="mm_button_action mm_button">Add AP
+                                bssid</button>
+                            <button onclick="filterAdd('#mac_table')" class="mm_button_action mm_button">Add STA
+                                mac</button>
+                        </div>
+                        <div style="display: flex; flex-direction: column;">
+                            <input id="new_mac" class="mm_input" type="text" pattern="[0-9A-Fa-f]+"></input>
+                            <button onclick="filterAdd(null)" class="mm_button_action mm_button">Add from input</button>
+                            <button onclick="filterSave()" class="mm_button_action_set mm_button">Set filter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="downloads" class="mm_tab">
+            <div style="display: flex; flex-direction: column;">
+                <div class="mm_progressStatus">
+                    <div id="download_progress_bar"></div>
+                </div>
+                <div id="load_buttons_div">
+                    <button class="mm_button_download mm_button" style="width: 46%;"
+                        onclick="downloadFile('/sd/wifi.pcp', 'wifi.pcap', this)">WIFI CAP</button>
+                    <button class="mm_button_download mm_button" style="width: 46%;"
+                        onclick="downloadFile('/sd/ip.pcp', 'ip.pcap', this)">IP CAP </button>
+                    <button class="mm_button_download mm_button" style="width: 46%;"
+                        onclick="downloadFile('/sd/scan_ap.jsn', 'scan_ap.json', this)">AP scanner</button>
+                    <button class="mm_button_download mm_button" style="width: 46%;"
+                        onclick="downloadFile('/sd/mac.jsn', 'mac.json', this)">STA MAC sniffer</button>
+                    <button class="mm_button_download mm_button" style="width: 46%;"
+                        onclick="downloadFile('/sd/fmac.txt', 'fmac.txt', this)">MAC filter</button>
+                    <button class="mm_button_download mm_button" style="width: 46%;"
+                        onclick="downloadFile('/sd/router.txt', 'router.txt', this)">Router config</button>
+                    <button class="mm_button_download mm_button" style="width: 46%;"
+                        onclick="downloadFile('/sd/router.jsn', 'router.json', this)">Router sniffer</button>
+                </div>
+            </div>
+        </div>
+        <div id="ap_spam_list" class="mm_tab">
+            <div style="display: flex; flex-direction: row wrap;">
+                <textarea class="mm_textarea" wrap="off" id="ap_spam_txt"></textarea>
+                <div style="display: flex; flex-direction: column;">
+                    <button onclick="saveSpamList()" class="mm_button_action_set mm_button">Set spam list</button>
+                    <button onclick="loadSpamListAsFile()" class="mm_button_action mm_button">Download file</button>
+                    <input id="spam_file_up" class="mm_input_file mm_button" type="file"
+                        onchange="handleSpamFiles(this.files)" onclick="this.value = null;" />
+                </div>
+            </div>
+        </div>
+        <div id="router_ap" class="mm_tab">
+            <div style="display: flex; flex-direction: column;">
+                <div style="display: flex; flex-direction: row;">
+                    <label class="mm_label">AP SSID:</label>
+                    <input class="mm_input" type="text" placeholder="Mandatory SSID" id="router_ap_ssid" required>
+                </div>
+                <div style="display: flex; flex-direction: row;">
+                    <label class="mm_label">AP password:</label>
+                    <input class="mm_input" type="text" placeholder="Optional password" id="router_ap_password">
+                </div>
+                <div style="display: flex; flex-direction: row;">
+                    <label class="mm_label">AP mac:</label>
+                    <input class="mm_input" type="text" placeholder="Empty for random MAC" id="router_ap_mac">
+                </div>
+                <div style="display: flex; flex-direction: row;">
+                    <label class="mm_label">STA SSID:</label>
+                    <input class="mm_input" type="text" placeholder="Mandatory SSID" id="router_sta_ssid" required>
+                </div>
+                <div style="display: flex; flex-direction: row;">
+                    <label class="mm_label">STA password:</label>
+                    <input class="mm_input" type="text" placeholder="Optional password" id="router_sta_password">
+                </div>
+                <div style="display: flex; flex-direction: row;">
+                    <label class="mm_label">STA hostname:</label>
+                    <input class="mm_input" type="text" placeholder="hostname" id="router_sta_hostname" required>
+                </div>
+                <div style="display: flex; flex-direction: row;">
+                    <label class="mm_label">STA mac:</label>
+                    <input class="mm_input" type="text" placeholder="Empty for random MAC" id="router_sta_mac">
+                </div>
+                <button onclick="saveRouterAp()" class="mm_button_action_set mm_button">Set configuration</button>
+                <input id="router_ap_file_up" class="mm_input_file mm_button" type="file"
+                    onchange="handleRouterApFiles(this.files);" onclick="this.value = null;" />
+            </div>
+        </div>
+        <div id="router_sniff" class="mm_tab" style="display: flex; flex-direction: column;">
+            <div style="display: flex; flex-direction: column;">
+                <table id="router_sniff_sta_table" class="mm_table" />
+                </table>
+                <table id="router_sniff_dns_table" class="mm_table" />
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    //==================================================================================
+    function switchTab(event, tabName) {
+        var tabs = document.getElementsByClassName('mm_tab');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].style.display = "none";
+        }
+        var tabbtn = document.getElementsByClassName('tabbtn');
+        for (var i = 0; i < tabs.length; i++) {
+            tabbtn[i].className = tabbtn[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        event.currentTarget.className += " active";
+    }
+    //==================================================================================
+    function downloadFile(url, file) {
+        var load_buttons_div = document.getElementById('load_buttons_div');
+        var pbar = document.getElementById('download_progress_bar');
+
+        pbar.style.display = 'block'
+        for (i = 0; i < load_buttons_div.children.length; i++) load_buttons_div.children[i].disabled = true;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.responseType = "blob";
+        xhr.onprogress = function (e) {
+            var p = e.total == 0 ? 0.0 : (e.loaded / e.total * 100.0);
+            pbar.style.width = p + '%';
+        }
+        xhr.onload = function () {
+            pbar.style.display = 'none';
+            for (i = 0; i < load_buttons_div.children.length; i++) load_buttons_div.children[i].disabled = false;
+
+            var urlCreator = window.URL || window.webkitURL;
+            var url = urlCreator.createObjectURL(this.response);
+            var link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', file);
+            link.click();
+        }
+        xhr.onerror = function () {
+            for (i = 0; i < load_buttons_div.children.length; i++) load_buttons_div.children[i].disabled = false;
+            pbar.style.display = 'none';
+            alert('loading error');
+        }
+        xhr.send();
+    }
+    //==================================================================================
+    function loadFile(url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function () {
+            var status = xhr.status;
+            if (status !== 200) {
+                alert('error [' + status + ']: ' + xhr.response);
+            } else {
+                callback(xhr.responseText);
+            }
+        };
+        xhr.onerror = function () {
+            alert('loading error');
+        }
+        xhr.send();
+    }
+
+    function addRecords(hd, tbl, tbody, list, addCheckBox) {
+        list.forEach(function (row) {
+            tr = document.createElement('tr');
+            //---                
+            if (addCheckBox) {
+                var checkbox = document.createElement('input');
+                checkbox.setAttribute('type', 'checkbox');
+                checkbox.className = 'mm_checkbox';
+                checkbox.id = tbl.id + row['bssid'];
+                checkbox.checked = false;
+                var td = document.createElement('td');
+                td.appendChild(checkbox);
+                tr.appendChild(td);
+            }
+            //---
+            hd.forEach(function (col) {
+                var td = document.createElement('td');
+                td.innerHTML = row[col];
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    function fillTable(tbl, captionText, hd, list, addCheckBox = true) {
+        var caption = document.createElement('caption');
+        caption.innerHTML = captionText;
+        tbl.appendChild(caption);
+        //--
+        var thead = document.createElement('thead');
+        var tr = document.createElement('tr');
+        //--
+        if (addCheckBox) {
+            var th = document.createElement('th');
+            th.innerHTML = "";
+            tr.appendChild(th);
+        }
+        //--
+        hd.forEach(function (h) {
+            var th = document.createElement('th');
+            th.innerHTML = h;
+            tr.appendChild(th);
+        });
+        console.log(tr);
+        thead.appendChild(tr);
+        tbl.appendChild(thead);
+        //--
+        //--
+        var tbody = document.createElement('tbody');
+        addRecords(hd, tbl, tbody, list, addCheckBox);
+        tbl.appendChild(tbody);
+    }
+
+    function filterRemove() {
+        var tbl = document.querySelector('#filter_table');
+        for (var i = tbl.rows.length - 1; i >= 0; i--) {
+            var checkbox = tbl.rows[i].cells[0].querySelector(".mm_checkbox");
+            if (checkbox != null && checkbox.checked == true) {
+                tbl.deleteRow(i);
+            }
+        }
+    }
+
+    function filterAdd(tableName) {
+        var list = new Array();
+        if (tableName == null) {
+            var o = new Object();
+            var inp = document.querySelector('#new_mac');
+            o.mac = inp.value;
+            list.push(o);
+        } else {
+            var rows = document.querySelector(tableName).rows;
+            for (var i = 0; i < rows.length; i++) {
+                var checkbox = rows[i].cells[0].querySelector(".mm_checkbox");
+                if (checkbox != null && checkbox.checked == true) {
+                    var o = new Object();
+                    o.mac = rows[i].cells[1].innerHTML;
+                    list.push(o);
+                }
+            }
+        }
+        var tbl = document.querySelector('#filter_table');
+        addRecords(['mac'], tbl, tbl.querySelector('tbody'), list, true);
+    }
+
+    function fillFilterTable(text) {
+        var astr = text.split('\n');
+        var list = new Array();
+        astr.forEach(function (s) {
+            if (s.length > 0) {
+                var o = new Object();
+                o.mac = s;
+                list.push(o);
+            }
+        });
+        var tbl = document.querySelector('#filter_table');
+        fillTable(tbl,
+            'Wifi MAC filter',
+            ['mac'],
+            list);
+    }
+
+    function handleFilterFiles(files) {
+        if (files.length == 0 && files[0].type !== 'text/plain') return;
+        var reader = new FileReader();
+        reader.onload = function (result) {
+            document.querySelector('#filter_table').innerHTML = "";
+            fillFilterTable(result.target.result);
+        }
+        reader.readAsText(files[0]);
+    }
+
+    function filterSave() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/sd/fmac.lst', true);
+        xhr.setRequestHeader("Content-type", "text/plain");
+        var data = "";
+        var tbl = document.querySelector('#filter_table');
+        for (var i = 1; i < tbl.rows.length; i++) {
+            data = data + tbl.rows[i].cells[1].innerHTML + "\n";
+        }
+        xhr.onload = function () {
+            if (xhr.status !== 200) {
+                alert(xhr.status + ': ' + xhr.statusText);
+            }
+        }
+        xhr.send(data);
+    }
+
+    function saveSpamList() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/sd/wspam.lst', true);
+        xhr.setRequestHeader("Content-type", "text/plain");
+        xhr.onload = function () {
+            if (xhr.status !== 200) {
+                alert(xhr.status + ': ' + xhr.statusText);
+            }
+        }
+        xhr.send(document.querySelector('#ap_spam_txt').value);
+    }
+
+    function loadSpamListAsFile() {
+        var urlCreator = window.URL || window.webkitURL;
+        var link = document.createElement('a');
+        link.setAttribute('href', '/sd/wspam.lst');
+        link.setAttribute('download', 'wspam.lst');
+        link.click();
+    }
+
+    function handleSpamFiles(files) {
+        if (files.length == 0 && files[0].type !== 'text/plain') return;
+        var reader = new FileReader();
+        reader.onload = function (result) {
+            console.log(result.target.result);
+            document.querySelector('#ap_spam_txt').value = result.target.result;
+        }
+        reader.readAsText(files[0]);
+    }
+
+    function saveRouterAp() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/sd/router.txt', true);
+        xhr.setRequestHeader("Content-type", "text/plain");
+        xhr.onload = function () {
+            if (xhr.status !== 200) {
+                alert(xhr.status + ': ' + xhr.statusText);
+            }
+        }
+        xhr.send(document.querySelector('#router_ap_ssid').value +
+            '\n' + document.querySelector('#router_ap_password').value +
+            '\n' + document.querySelector('#router_ap_mac').value +
+            '\n' + document.querySelector('#router_sta_ssid').value +
+            '\n' + document.querySelector('#router_sta_password').value +
+            '\n' + document.querySelector('#router_sta_hostname').value +
+            '\n' + document.querySelector('#router_sta_mac').value);
+    }
+
+    function parseRouterApConfig(text) {
+        var astr = text.split('\n');
+        if (astr.length > 0) document.querySelector('#router_ap_ssid').value = astr[0];
+        if (astr.length > 1) document.querySelector('#router_ap_password').value = astr[1];
+        if (astr.length > 2) document.querySelector('#router_ap_mac').value = astr[2];
+        if (astr.length > 3) document.querySelector('#router_sta_ssid').value = astr[3];
+        if (astr.length > 4) document.querySelector('#router_sta_password').value = astr[4];
+        if (astr.length > 5) document.querySelector('#router_sta_hostname').value = astr[5];
+        if (astr.length > 6) document.querySelector('#router_sta_mac').value = astr[6];
+    }
+
+    function handleRouterApFiles(files) {
+        if (files.length == 0 && files[0].type !== 'text/plain') return;
+        var reader = new FileReader();
+        reader.onload = function (result) {
+            console.log(result.target.result);
+            parseRouterApConfig(result.target.result);
+        }
+        reader.readAsText(files[0]);
+    }
+    //==================================================================================
+    loadFile('/sd/scan_ap.jsn', function (text) {
+        var data = JSON.parse(text);
+        fillTable(document.querySelector('#ap_table'),
+            'Wifi AP scanner result table (scanner count:' + data.scan_count + ')',
+            ['bssid', 'cnt', 'ssid', 'rssi', 'auth', 'ch', 'pChiper', 'gChiper'],
+            data.ap_list);
+    });
+    loadFile('/sd/mac.jsn', function (text) {
+        var data = JSON.parse(text);
+        fillTable(document.querySelector('#mac_table'),
+            'Wifi STA sniffer result table (frames:' + data.frames + ')',
+            ['mac', 'connect', 'active', 'ts', 'dest', 'bssid'],
+            data.mac_list);
+    });
+
+    loadFile('/sd/fmac.lst', fillFilterTable);
+
+    loadFile('/sd/wspam.lst', function (text) {
+        document.querySelector('#ap_spam_txt').value = text;
+    });
+
+    loadFile('/sd/router.txt', parseRouterApConfig);
+
+    loadFile('/sd/router.jsn', function (text) {
+        var data = JSON.parse(text);
+        fillTable(document.querySelector('#router_sniff_sta_table'),
+            'routed STA list',
+            ['mac', 'hostname', 'dt'],
+            data.sta_list, false);
+        fillTable(document.querySelector('#router_sniff_dns_table'),
+            'router DNS list',
+            ['mac', 'url', 'dt'],
+            data.dns_list, false);
+    });
+
+    document.querySelector('#defTab').click();
+</script>
+
+
+</html>

@@ -1,0 +1,1 @@
+ssh -i d:/.ssh/user.key user@192.168.1.3 "docker run --rm -v $HOME/project:/project -w /project espressif/idf ./build_patched.sh"
