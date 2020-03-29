@@ -307,7 +307,7 @@ static void wifi_route(void *arg, bool useFilter, bool savePCAP) {
 
     PcapFileQueue *queue;
     if (savePCAP) {
-        queue = new PcapFileQueue(1024 * 32);
+        queue = new PcapFileQueue(1024 * 64);
         int st = queue->createPcapFile(FNAME_IP_PCUP, PCAP_LINKTYPE_ETHERNET);
         if (st != 0) {
             scr_error((st == PcapFileQueue::ERR_OPEN_FILE)

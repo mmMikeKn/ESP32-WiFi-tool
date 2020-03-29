@@ -1,7 +1,7 @@
+#include "common.hpp"
 #include "esp32/rom/crc.h"
 #include "esp_log.h"
 #include "esp_system.h"
-#include "common.hpp"
 
 #include "PcapFileQueue.hpp"
 
@@ -49,7 +49,7 @@ int PcapFileQueue::createPcapFile(const char *fname, int networkType) {
 int PcapFileQueue::savePcapFileChunk() {
     if (pcap_file_ptr == NULL) return ERR_NO_FILE;
     int sz;
-    uint8_t buf[1024];
+    uint8_t buf[2048];
     if ((sz = get(buf, sizeof(buf))) > 0) {
         pcap_file_body_crc32 = crc32_le(pcap_file_body_crc32, buf, sz);
         if (fwrite(buf, sizeof(uint8_t), sz, pcap_file_ptr) != sz) {
@@ -57,6 +57,7 @@ int PcapFileQueue::savePcapFileChunk() {
             pcap_file_ptr = NULL;
             return ERR_WRITE_FILE;
         }
+        fflush(pcap_file_ptr);
         pcap_file_body_sz += sz;
         return sz;
     }
@@ -98,36 +99,36 @@ void PcapFileQueue::init(int init_size) {
 }
 
 bool PcapFileQueue::put(uint8_t *ptr, uint16_t length) {
+#ifdef TRACE_QUEUE
+    ESP_LOGI(TAG, "p< L:%d (%d)  %d/%d", length, sz, mutex.owner, mutex.count);
+#endif
+    vPortCPUAcquireMutex(&mutex);
+    bool ret = true;
     if ((sz + length + 1) >= max_sz) {
 #ifdef TRACE_QUEUE
         ESP_LOGE(TAG, "lost pcaprec: %d/%d/%d", length, sz, max_sz);
 #endif
-        lost_data_cnt++;
-        return false;
+        ret = false;
+    } else {
+        for (int i = 0; i < length; i++) {
+            if (in_ptr >= max_sz) in_ptr = 0;
+            buf[in_ptr++] = ptr[i];
+            sz++;
+        }
+        put_data_crc32 = crc32_le(put_data_crc32, ptr, length);
+        put_data_sz += length;
     }
-
-#ifdef TRACE_QUEUE
-    ESP_LOGI(TAG, "p< [%d] L:%d (%d)  %d/%d", (int)esp_timer_get_time(), length, sz, mutex.owner, mutex.count);
-#endif
-    vPortCPUAcquireMutex(&mutex);
-    for (int i = 0; i < length; i++) {
-        if (in_ptr >= max_sz) in_ptr = 0;
-        buf[in_ptr++] = ptr[i];
-        sz++;
-    }
-    put_data_crc32 = crc32_le(put_data_crc32, ptr, length);
-    put_data_sz += length;
     vPortCPUReleaseMutex(&mutex);
 #ifdef TRACE_QUEUE
-    ESP_LOGI(TAG, "p> [%d] (%d) %d/%d", (int)esp_timer_get_time(), sz, mutex.owner, mutex.count);
+    ESP_LOGI(TAG, "p> (%d) %d/%d", sz, mutex.owner, mutex.count);
 #endif
-    return true;
+    return ret;
 }
 
 int PcapFileQueue::get(uint8_t *ptr, uint16_t length) {
     int indx = 0;
 #ifdef TRACE_QUEUE
-    ESP_LOGI(TAG, "g< [%d] %d (%d)  %d/%d", (int)esp_timer_get_time(), length, sz, mutex.owner, mutex.count);
+    ESP_LOGI(TAG, "g< %d (%d)  %d/%d", length, sz, mutex.owner, mutex.count);
 #endif
     vPortCPUAcquireMutex(&mutex);
     while (sz > 0 && indx < length) {
@@ -137,15 +138,15 @@ int PcapFileQueue::get(uint8_t *ptr, uint16_t length) {
     }
     vPortCPUReleaseMutex(&mutex);
 #ifdef TRACE_QUEUE
-    ESP_LOGI(TAG, "g> [%d] L:%d (%d) %d/%d", (int)esp_timer_get_time(), indx, sz, mutex.owner, mutex.count);
+    ESP_LOGI(TAG, "g> L:%d (%d) %d/%d", indx, sz, mutex.owner, mutex.count);
 #endif
     return indx;
 }
 
 bool PcapFileQueue::putPCAP(uint8_t *ptr, uint16_t length) {
     int pcap_rec_sz = sizeof(pcaprec_hdr_t) + length;
-    if (getFreeSize() < pcap_rec_sz) {
-        //ESP_LOGE(TAG, "lost pcaprec: %d/%d/%d", sz, queue_sz, queue_max_sz);
+    if ((max_sz - sz - 2048) < pcap_rec_sz) {
+        ESP_LOGE(TAG, "lost pcap rec: %d %d/%d", pcap_rec_sz, sz, max_sz);
         lost_data_cnt++;
         return false;
     }
@@ -154,5 +155,7 @@ bool PcapFileQueue::putPCAP(uint8_t *ptr, uint16_t length) {
     int64_t t = esp_timer_get_time();
     rec.ts_sec = t / 1000000L;
     rec.ts_usec = t % 1000000L;
-    return put((uint8_t *)&rec, sizeof(rec)) && put(ptr, length);
+    bool ret = put((uint8_t *)&rec, sizeof(rec)) && put(ptr, length);
+    if(!ret ) scr_error("Failed to put pcap record. [%d/%d]", sz, max_sz);
+    return ret;
 }

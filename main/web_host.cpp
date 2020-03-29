@@ -111,12 +111,16 @@ static esp_err_t load_long_file_handler(httpd_req_t *req, const char *fname, con
         httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Failed to read file");
         return ESP_FAIL;
     }
-    ESP_LOGI(TAG, "download %s", fname);
-    char buf[2048];
-    int n;
+    fseek(fd, 0L, SEEK_END);
+    int fsz = ftell(fd);
+    fseek(fd, 0L, SEEK_SET);
+
+    ESP_LOGI(TAG, "download '%s' sz=%d", fname, fsz);
+    char buf[1024];
+    int n, cnt = 0, lastPercent = -1;
     httpd_resp_set_type(req, "application/cap");
     sprintf(buf, "attachment; filename=\"%s\"", fname_out);
-    httpd_resp_set_hdr(req, "Content-Disposition", buf);
+    httpd_resp_set_hdr(req, "Content-Disposition", buf);    
     while ((n = fread(buf, 1, sizeof(buf), fd)) != 0) {
         if (httpd_resp_send_chunk(req, buf, n) != ESP_OK) {
             fclose(fd);
@@ -125,10 +129,16 @@ static esp_err_t load_long_file_handler(httpd_req_t *req, const char *fname, con
             httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to send file");
             return ESP_FAIL;
         }
+        cnt += n;
+        int p = 100 * cnt/fsz;
+        if(lastPercent != p) {
+            scr_printf(0, 16 * SCR_LINE_URI, SCR_DUMP_COLOR, "%d %d%%          ", fsz, p);
+        }
+        lastPercent = p;
     }
     fclose(fd);
     httpd_resp_send_chunk(req, NULL, 0);
-    ESP_LOGI(TAG, "%s file sending complete", fname);
+    ESP_LOGI(TAG, "%s file sending complete [%d/%d]", fname, cnt, fsz);
     return ESP_OK;
 }
 

@@ -180,23 +180,6 @@
             border-radius: 5px;
         }
 
-        .mm_progressStatus {
-            width: 100%;
-            background-color: #ddd;
-        }
-
-        #download_progress_bar {
-            width: 0.1%;
-            height: 64px;
-            background-color: green;
-            align-self: center;
-            text-align: center;
-            line-height: 64px;
-            color: white;
-            font-size: 3em;
-            display: none
-        }
-
         .mm_textarea {
             padding: 0;
             background: lightcyan;
@@ -212,14 +195,47 @@
             text-align: center;
             display: inline-block;
         }
+
+        .mm_loader {
+            -webkit-border-radius: 50%;
+            border-radius: 50%;
+            border: 2em solid blue;
+            border-top: 2em solid #a9fffc;
+            border-right: 2em solid blue;
+            border-bottom: 2em solid #a9fffc;
+            border-left: 2em solid blue;
+            opacity: 0.5;
+            width: 10em;
+            height: 10em;            
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+
     </style>
 </head>
 
 <body>
     <div class="mm_nav">
-        <a href="javascript:void(0);" class="icon" onclick="myFunction()">
-            <i class="fa fa-bars"></i>
-        </a>
         <button class="tabbtn" onclick="switchTab(event, 'filters')" id="defTab">Filter</button>
         <button class="tabbtn" onclick="switchTab(event, 'downloads')">Downloads</button>
         <button class="tabbtn" onclick="switchTab(event, 'ap_spam_list')">Spam list</button>
@@ -260,9 +276,7 @@
         </div>
         <div id="downloads" class="mm_tab">
             <div style="display: flex; flex-direction: column;">
-                <div class="mm_progressStatus">
-                    <div id="download_progress_bar"></div>
-                </div>
+                <div id="download_progress_bar" class="hide"></div>
                 <div id="load_buttons_div">
                     <button class="mm_button_download mm_button" style="width: 46%;"
                         onclick="downloadFile('/sd/wifi.pcp', 'wifi.pcap', this)">WIFI CAP</button>
@@ -358,15 +372,13 @@
         var pbar = document.getElementById('download_progress_bar');
 
         pbar.style.display = 'block'
+        pbar.className = 'mm_loader'
+
         for (i = 0; i < load_buttons_div.children.length; i++) load_buttons_div.children[i].disabled = true;
 
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.responseType = "blob";
-        xhr.onprogress = function (e) {
-            var p = e.total == 0 ? 0.0 : (e.loaded / e.total * 100.0);
-            pbar.style.width = p + '%';
-        }
         xhr.onload = function () {
             pbar.style.display = 'none';
             for (i = 0; i < load_buttons_div.children.length; i++) load_buttons_div.children[i].disabled = false;
